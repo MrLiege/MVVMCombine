@@ -15,7 +15,6 @@ final class MainViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     
     private let cellulSelected: CurrentValueSubject<Cellula?, Never>
-    let scrollToBottom = PassthroughSubject<Void, Never>()
     
     init(cellulSelected: CurrentValueSubject<Cellula?, Never> = CurrentValueSubject<Cellula?, Never>(nil)) {
         self.cellulSelected = cellulSelected
@@ -41,7 +40,6 @@ extension MainViewModel {
         output.cells.append(newCell.data)
         
         checkLifeCycle()
-        scrollToBottom.send()
     }
     
     private func checkLifeCycle() {
@@ -52,7 +50,9 @@ extension MainViewModel {
         if lastThreeCells.allSatisfy({ $0.name == "Живая" }) {
             output.cells.append(Cellula.CellType.life.data)
         } else if lastThreeCells.allSatisfy({ $0.name == "Мертвая" }) {
-            output.cells.removeAll { $0.name == "Живая" }
+            if let index = output.cells.lastIndex(where: { $0.name == "Жизнь" }) {
+                output.cells.remove(at: index)
+            }
         }
     }
 }
@@ -63,7 +63,6 @@ extension MainViewModel {
     }
     
     struct Output {
-        var cellula: Cellula?
         var cells: [Cellula] = []
     }
 }
